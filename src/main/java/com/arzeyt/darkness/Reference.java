@@ -5,7 +5,7 @@ public final class Reference {
 	public static final int DARKNESS_CHECK_RATE = 40*2;//twice the ticks
 
 	//tower
-	public static final int TOWER_RADIUS=50;
+	public static final int TOWER_RADIUS=60;
 	public static final int TOWER_DEPLETION_RATE=12000/100;
 	public static final int TOWER_CHARGE_RATE=6000/100;
 	public static final int TOWER_CHARGE_START_TIME=0;
@@ -50,6 +50,7 @@ public final class Reference {
 
 	//player nbt
 	public static final String P_GHOST = "ghost";
+	public static final String P_SPAWN_DIMID = "dimID";
 	public static final String P_SPAWN_X = "spawnX";
 	public static final String P_SPAWN_Y = "spawnY";
 	public static final String P_SPAWN_Z = "spawnZ";

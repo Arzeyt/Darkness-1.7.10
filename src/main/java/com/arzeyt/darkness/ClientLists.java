@@ -37,9 +37,9 @@ public class ClientLists {
 	public void addPoweredTower(TowerTileEntity t){
 		if(towerExists(t)==false){
 			poweredTowers.add(t);
-			System.out.println("added powered tower");
+			//System.out.println("added powered tower");
 		}
-		System.out.println("tried to add powered tower");
+		//System.out.println("tried to add powered tower");
 	}
 
 	/**
@@ -61,9 +61,9 @@ public class ClientLists {
 	public void removePoweredTower(TowerTileEntity t){
 		if(getPoweredTowers().contains(t)){
 			poweredTowers.remove(t);
-			System.out.println("removed powered tower");
+			//System.out.println("removed powered tower");
 		}
-		System.out.println("tried to remove powered tower");
+		//System.out.println("tried to remove powered tower");
 	}
 
 	public TowerTileEntity getTowerAt(int x, int y, int z){

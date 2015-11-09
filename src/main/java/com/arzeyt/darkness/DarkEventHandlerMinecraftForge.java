@@ -14,6 +14,7 @@ import net.minecraft.entity.monster.EntitySpider;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
@@ -50,7 +51,8 @@ public class DarkEventHandlerMinecraftForge {
 						&& stack.hasTagCompound()
 						&& stack.getItem() instanceof LightOrbItem){
 					Darkness.darkLists.addLightOrb(stack);
-					System.out.println("added light orb to darkList");
+
+					//System.out.println("added light orb to darkList");
 				}
 			}
 		}
@@ -62,7 +64,8 @@ public class DarkEventHandlerMinecraftForge {
 			TowerTileEntity te = (TowerTileEntity) e.world.getTileEntity(e.x, e.y, e.z);
 			if(Darkness.darkLists.towerExists(te)){
 				Darkness.darkLists.removePoweredTower(te);
-				System.out.println("removed tower");
+
+				//System.out.println("removed tower");
 			}
 		}
 	}
@@ -83,11 +86,12 @@ public class DarkEventHandlerMinecraftForge {
 	@SubscribeEvent
 	public void onBlockPlaceInDarkness(PlayerInteractEvent e){
 		if(e.entity.worldObj.isRemote)return;
-		if(Darkness.darkLists.inDarkness(e.world, new BlockPos(e.x, e.y, e.z))){
+		if(Darkness.darkLists.isPlayerInDarkness(e.entityPlayer)){
 			if(e.entityPlayer.inventory.getCurrentItem()!=null){
 				ItemStack stack = e.entityPlayer.inventory.getCurrentItem();
 				//item is block
 				if(Block.getBlockFromItem(stack.getItem())!=null){
+					System.out.println("denied!");
 					e.useItem= Event.Result.DENY;
 					Darkness.simpleNetworkWrapper.sendTo(new FXMessageToClient(Reference.FX_BLOCK, e.x,e.y+1,e.z),(EntityPlayerMP) e.entityPlayer);
 					e.world.playSoundAtEntity(e.entityPlayer, "darkness:whooshPuff", 1.2F, 1.0F);
@@ -106,6 +110,7 @@ public class DarkEventHandlerMinecraftForge {
 	
 	@SubscribeEvent
 	public void onOrbDespawnDetonate(ItemExpireEvent e){
+		if(e.entity.worldObj.isRemote)return;
 		if(e.entityItem.getEntityItem().getItem() instanceof LightOrbItem){
 			ItemStack orb = e.entityItem.getEntityItem();
 			BlockPos pos = new BlockPos(e.entity.posX, e.entity.posY, e.entity.posZ);
@@ -124,7 +129,7 @@ public class DarkEventHandlerMinecraftForge {
 			Iterator it = mobs.iterator();
 			while(it.hasNext()){
 				EntityMob mob = (EntityMob) it.next();
-				mob.setVelocity(-0.5D+rand.nextDouble(), 1.5D, -0.5D+rand.nextDouble());
+				mob.addVelocity(-0.5D+rand.nextDouble(), 2D, -0.5D+rand.nextDouble());
 				mob.setFire(10);
 				mob.attackEntityFrom(DamageSource.onFire, 10);
 			}
@@ -144,9 +149,11 @@ public class DarkEventHandlerMinecraftForge {
 					&& stack!= null 
 					&& stack.getItem() instanceof LightOrbItem){
 				//debug
-				System.out.println("Towers: "+Darkness.darkLists.getPoweredTowers().size());
+
+				//System.out.println("Towers: "+Darkness.darkLists.getPoweredTowers().size());
 				for(TowerTileEntity t : Darkness.darkLists.getPoweredTowers()){
-					System.out.println("tower pos: "+t.xCoord+" "+t.yCoord+" "+t.zCoord);
+
+					//System.out.println("tower pos: "+t.xCoord+" "+t.yCoord+" "+t.zCoord);
 				}
 				
 				
@@ -169,6 +176,7 @@ public class DarkEventHandlerMinecraftForge {
 	@SubscribeEvent
 	public void onMobDamage(LivingAttackEvent e){
 		//player attack
+		if(e.entityLiving.worldObj.isRemote)return;
 		if(e.source.getEntity() instanceof EntityPlayer){
 			EntityPlayer p = (EntityPlayer) e.source.getEntity();
 			//invincimob
@@ -228,49 +236,65 @@ public class DarkEventHandlerMinecraftForge {
 	public void playerDeath(LivingDeathEvent e){
 		if(e.entityLiving.worldObj.isRemote)return;
 		if(e.entityLiving instanceof EntityPlayer){
+
+			//System.out.println("player died");
 			EntityPlayer p = (EntityPlayer) e.entityLiving;
 			p.setSpawnChunk(new ChunkCoordinates((int)p.posX, (int)p.posY, (int)p.posZ), true, p.dimension);
 			if(p.getEntityData().hasKey("darkness")==false){
 				p.getEntityData().setTag("darkness", new NBTTagCompound());
 			}
 			NBTTagCompound tag = (NBTTagCompound) p.getEntityData().getTag("darkness");
+			tag.setInteger(Reference.P_SPAWN_DIMID, p.worldObj.provider.dimensionId);
 			tag.setInteger(Reference.P_SPAWN_X, (int) p.posX);
 			tag.setInteger(Reference.P_SPAWN_Y, (int) p.posY);
 			tag.setInteger(Reference.P_SPAWN_Z, (int) p.posZ);
+			Darkness.darkLists.addSpawnPoint(p,new BlockPos(p.posX, p.posY, p.posZ));
 			Darkness.darkLists.addGhostPlayer(p);
 		}
 	}
 
 	//cancels interactions with everything. Also resurrects on tower absorb
 	@SubscribeEvent
-	public void deadPlayerInteract(PlayerInteractEvent e){
-		System.out.println("interact = "+e.action.toString());
-		if(e.entityPlayer.worldObj.isRemote)return;
-		EntityPlayer p = e.entityPlayer;
-		if(Darkness.darkLists.isGhost(p)) {
-			if (e.action.equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) {
-				if (p.getEntityWorld().getTileEntity(e.x, e.y, e.z) != null
-						&& p.getEntityWorld().getTileEntity(e.x, e.y, e.z) instanceof TowerTileEntity) {//resurrection
-					TowerTileEntity t = (TowerTileEntity) p.getEntityWorld().getTileEntity(e.x, e.y, e.z);
-					if (t.getPower() > 99) {
-						t.setPower(1);
-						p.setInvisible(false);
-						DPlayer.nbtSetGhost(p,false);
-						Darkness.simpleNetworkWrapper.sendTo(new GhostMessageToClient(false), (EntityPlayerMP) p);
-						Darkness.darkLists.removeGhostPlayer(p);
-						Darkness.simpleNetworkWrapper.sendToAll(new FXMessageToClient(Reference.FX_OUTWARDS_SPARKLE, (int)p.posX, (int)p.posY, (int)p.posZ));
-						p.worldObj.playSoundAtEntity(p,"darkness:bell",1.0F,1.2F);
+	public void deadPlayerInteract(PlayerInteractEvent e) {
+		//
+		// //System.out.println("interact = "+e.action.toString());
+		if (e.entityPlayer.worldObj.isRemote == false) { //server side resurrection
+			EntityPlayer p = e.entityPlayer;
+			if (Darkness.darkLists.isGhost(p)) {
+				System.out.println("player is ghost");
+				if (e.action.equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) {
+					if (p.getEntityWorld().getTileEntity(e.x, e.y, e.z) != null
+							&& p.getEntityWorld().getTileEntity(e.x, e.y, e.z) instanceof TowerTileEntity) {//resurrection
+						TowerTileEntity t = (TowerTileEntity) p.getEntityWorld().getTileEntity(e.x, e.y, e.z);
+						if (t.getPower() > 99) {
+							t.setPower(1);
+							p.setInvisible(false);
+							DPlayer.nbtSetGhost(p, false);
+							Darkness.simpleNetworkWrapper.sendTo(new GhostMessageToClient(false), (EntityPlayerMP) p);
+							Darkness.darkLists.removeGhostPlayer(p);
+							Darkness.simpleNetworkWrapper.sendToAll(new FXMessageToClient(Reference.FX_OUTWARDS_SPARKLE, (int) p.posX, (int) p.posY, (int) p.posZ));
+							p.worldObj.playSoundAtEntity(p, "darkness:bell", 1.0F, 1.2F);
+						}
 					}
 				}
-			}else if(e.action.equals(PlayerInteractEvent.Action.RIGHT_CLICK_AIR)){
-				System.out.println("right clicked air");
-				if(p.getFoodStats().getFoodLevel()>=6){
-					System.out.println("blink passed");
-					EffectHelper.blink(p);
-					p.getFoodStats().setFoodLevel(p.getFoodStats().getFoodLevel()-6);
+				e.setCanceled(true);
+			}
+		} else { //client side
+			if(Darkness.clientLists.isGhost()) {
+
+				if (e.action.equals(PlayerInteractEvent.Action.RIGHT_CLICK_AIR)) {//blink
+
+					//System.out.println("right clicked air");
+					if (e.entityPlayer.getFoodStats().getFoodLevel() >= 6) {
+
+						//System.out.println("blink passed");
+						EffectHelper.blink(e.entityPlayer);
+						e.entityPlayer.getFoodStats().setFoodLevel(e.entityPlayer.getFoodStats().getFoodLevel() - 6);
+						//}
+					}
+					e.setCanceled(true);
 				}
 			}
-			e.setCanceled(true);
 		}
 	}
 

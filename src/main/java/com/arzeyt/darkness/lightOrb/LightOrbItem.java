@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 
 public class LightOrbItem extends Item {
 
-	private final String itemName="lightOrb";
+	private final String itemName="lightOrbItem";
 	private final double DISSIPATION_TICKS = 6000;
 	private final int UPDATE_RATE = 20;
 	
@@ -34,6 +34,7 @@ public class LightOrbItem extends Item {
 		setMaxStackSize(1);
 		this.dissipationCounter=(int) (DISSIPATION_TICKS/UPDATE_RATE);
 		this.setMaxDamage(100);
+		setFull3D();
 	}
 	
 	public String getName(){
@@ -108,12 +109,12 @@ public class LightOrbItem extends Item {
 	
 	/**
 	 * Overrides all nbt info! use with caution
-	 * @param stack - a lightOrb item stack (no checks to ensure this)
+	 * @param stack - a lightOrbItem item stack (no checks to ensure this)
 	 * @param power
 	 */
 	public void setPowerNBT(ItemStack stack, int power){
 		if(stack.hasTagCompound() && stack.getTagCompound().getTag("darkness")!=null){
-			System.out.println("darkness tag exists");
+			//System.out.println("darkness tag exists");
 			NBTTagCompound compound = stack.getTagCompound();
 			NBTTagCompound nbt = (NBTTagCompound) compound.getTag("darkness");
 			nbt.setInteger("power", power);
@@ -134,16 +135,16 @@ public class LightOrbItem extends Item {
 			EntityPlayer playerIn) {
 		
 		if(itemStackIn.hasTagCompound()==false){
-			System.out.println("u must beh haxin, cuz that dont got no dats, brah");
+			//System.out.println("u must beh haxin, cuz that dont got no dats, brah");
 		}else{
 			//debug info CLIENT ONLY
 			Reference r = new Reference();
 			NBTTagCompound nbt = itemStackIn.getTagCompound().getCompoundTag("darkness");
-			System.out.println("------------------------------------------------------------------");
-			System.out.println("ID: "+nbt.getInteger(Reference.ID)+" Power: "+nbt.getInteger(Reference.POWER)+" DissipationP: "+nbt.getInteger(Reference.DISSIPATION_PERCENT));
-			System.out.println("orbs in list (lightOrb): "+Darkness.darkLists.getLightOrbs().size());
+			//System.out.println("------------------------------------------------------------------");
+			//System.out.println("ID: "+nbt.getInteger(Reference.ID)+" Power: "+nbt.getInteger(Reference.POWER)+" DissipationP: "+nbt.getInteger(Reference.DISSIPATION_PERCENT));
+			//System.out.println("orbs in list (lightOrbItem): "+Darkness.darkLists.getLightOrbs().size());
 			
-			System.out.println("------------------------------------------------------------------");
+			//System.out.println("------------------------------------------------------------------");
 		}
 
 		

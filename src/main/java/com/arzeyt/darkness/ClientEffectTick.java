@@ -71,14 +71,15 @@ public class ClientEffectTick {
 			}
 		}
 	}
-	
-	//DoES NOT WORK
-	// cannot simply keep setting time to night client side
-	public void nightRender(ClientTickEvent e){
-		if(e.side==Side.CLIENT && Minecraft.getMinecraft().theWorld!=null){
 
+	@SubscribeEvent
+	public void HungerReplenish(ClientTickEvent e){
+		if(Darkness.clientLists.isGhost()
+				&& Darkness.clientLists.isPlayerInTowerRadius(Minecraft.getMinecraft().thePlayer)){
+			Minecraft.getMinecraft().thePlayer.getFoodStats().setFoodLevel(Minecraft.getMinecraft().thePlayer.getFoodStats().getFoodLevel()+1);
 		}
 	}
+
 
 	//disabled
 	public void playerFlight(ClientTickEvent e){
@@ -103,9 +104,12 @@ public class ClientEffectTick {
 			if (Minecraft.getMinecraft().theWorld == null) {
 				return;
 			}
+			if(Minecraft.getMinecraft().theWorld.provider.dimensionId!=0){
+				return;
+			}
 			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 			BlockPos pos = new BlockPos(player.posX, player.posY, player.posZ);
-			int radius = 7;
+			int radius = 10;
 			int height = 3;
 			int spawnChance = 5;
 
@@ -121,7 +125,7 @@ public class ClientEffectTick {
 							}else if(Minecraft.getMinecraft().thePlayer.getHeldItem()!=null
 									&& Minecraft.getMinecraft().thePlayer.getHeldItem().getItem() instanceof LightOrbItem
 									&& Darkness.clientLists.isPosInTowerRadiusX2minus1(Minecraft.getMinecraft().theWorld, new BlockPos(x,y,z))==false){
-								Minecraft.getMinecraft().theWorld.spawnParticle("instantSpell", x,y,z, 0.0D, 0.0D, 0.0D);
+								Minecraft.getMinecraft().theWorld.spawnParticle("witchMagic", x,y,z, 0.0D, 0.0D, 0.0D);
 							}else if(Darkness.clientLists.isPosInTowerRadiusPlus1(Minecraft.getMinecraft().theWorld, new BlockPos(x,y,z))){
 								Minecraft.getMinecraft().theWorld.spawnParticle("fireworksSpark", x, y, z, 0.0D, 0.5D, 0.0D);
 							}else {

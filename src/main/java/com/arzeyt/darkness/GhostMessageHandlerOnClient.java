@@ -31,15 +31,14 @@ public class GhostMessageHandlerOnClient implements IMessageHandler<GhostMessage
         return null;
     }
 
-    protected void processMessage(WorldClient worldClient,
-                                  GhostMessageToClient message) {
+    protected void processMessage(WorldClient worldClient, GhostMessageToClient message) {
 
-        System.out.println("processing GhostMessageToClient client side");
+        //System.out.println("processing GhostMessageToClient client side");
 
         if(message.isGhost){
-            System.out.println("client player is ghost");
+            //System.out.println("client player is ghost");
         }else{
-            System.out.println("Client player is not a ghost");
+            //System.out.println("Client player is not a ghost");
         }
         Darkness.clientLists.setGhost(message.isGhost);
 

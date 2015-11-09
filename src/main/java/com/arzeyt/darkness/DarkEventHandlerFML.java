@@ -5,9 +5,12 @@ import java.util.*;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
@@ -19,6 +22,8 @@ import com.arzeyt.darkness.lightOrb.Detonation;
 import com.arzeyt.darkness.lightOrb.DetonationMessageToClient;
 import com.arzeyt.darkness.lightOrb.LightOrbItem;
 import com.arzeyt.darkness.lightOrb.OrbUpdateMessageToClient;
+
+import static cpw.mods.fml.relauncher.Side.CLIENT;
 
 
 public class DarkEventHandlerFML {
@@ -36,7 +41,7 @@ public class DarkEventHandlerFML {
 
 	
 	@SubscribeEvent
-	public void darknessCheck(TickEvent.ServerTickEvent e){
+	public void darknessCheck(ServerTickEvent e){
 		
 		if(counter%DARKNESS_CHECK_RATE==0){
 
@@ -46,42 +51,47 @@ public class DarkEventHandlerFML {
 			{
 				EntityPlayerMP player = (EntityPlayerMP) iterator.next();
 				WorldServer world = MinecraftServer.getServer().worldServerForDimension(player.dimension);
+
+			//not in overworld
+				if(world.provider.dimensionId!=0){
+					Darkness.darkLists.removePlayerInDarkness(player);
+				}
 				
 			//held orb
-				if(player.getHeldItem()!=null
+				else if(player.getHeldItem()!=null
 						&& player.getHeldItem().getItem() instanceof LightOrbItem
 						&& Darkness.darkLists.getPlayersWithOrb().contains(player)==false){					
 					
 					Darkness.darkLists.addPlayerWithOrb(player);
 					Darkness.darkLists.removePlayerInDarkness(player);
-					System.out.println(player.getDisplayName()+" is holding orb");
+					//System.out.println(player.getDisplayName()+" is holding orb");
 				}
 			//tower
 				else if(Darkness.darkLists.getPoweredTowers().isEmpty()==false
 						&& Darkness.darkLists.isPlayerInTowerRadius(player)){
 					Darkness.darkLists.removePlayerInDarkness(player);
-					System.out.println(player.getDisplayName()+" is near powered tower");
+					//System.out.println(player.getDisplayName()+" is near powered tower");
 				}
 			//player
 				else if(Darkness.darkLists.getPlayersWithOrb().isEmpty()==false
 						&& Darkness.darkLists.getDistanceToNearestPlayerWithOrb(player)<=HELD_ORB_RADIUS){
 					Darkness.darkLists.removePlayerInDarkness(player);
-					System.out.println(player.getDisplayName()+" is near player with orb");
+					//System.out.println(player.getDisplayName()+" is near player with orb");
 				}
 			//detonations
 				else if(Darkness.darkLists.getOrbDetonations().isEmpty()==false
 						&& Darkness.darkLists.getDistanceToNearestOrbDetonation(player)<=ORB_DETONATION_RAIDUS){
 					Darkness.darkLists.removePlayerInDarkness(player);
-					System.out.println(player.getDisplayName()+" is near orb detonation");
+					//System.out.println(player.getDisplayName()+" is near orb detonation");
 				}
 			//player is in darkness if none of the above are true
 				else if(Darkness.darkLists.getPlayersInDarkness().isEmpty()==true
 							|| Darkness.darkLists.getPlayersInDarkness().contains(player)==false){
 						Darkness.darkLists.addPlayersInDarkness(player);
-						System.out.println(player.getDisplayName()+" is in darkness");
+						//System.out.println(player.getDisplayName()+" is in darkness");
 				}
 				
-				System.out.println("Player in darkness: "+Darkness.darkLists.isPlayerInDarkness(player));
+				//System.out.println("Player in darkness: "+Darkness.darkLists.isPlayerInDarkness(player));
 			}
 		
 		}
@@ -92,15 +102,16 @@ public class DarkEventHandlerFML {
 	}
 	
 	@SubscribeEvent
-	public void orbDepletion(TickEvent.ServerTickEvent e){
+	public void orbDepletion(ServerTickEvent e){
+		if(e.side== Side.CLIENT)return;
 		if(counter%ORB_DEPLETION_RATE==0
 				&&Darkness.darkLists.getLightOrbs().isEmpty()==false){
-			System.out.println("orbs in list: "+Darkness.darkLists.getLightOrbs());
+			//System.out.println("orbs in list: "+Darkness.darkLists.getLightOrbs());
 			HashSet<ItemStack> removalOrbs = new HashSet<ItemStack>();
 			
 			for(ItemStack orb : Darkness.darkLists.getLightOrbs()){
 				if(orb.hasTagCompound()==false){
-					System.out.println("Orb doesn't have TAG! D:");
+					//System.out.println("Orb doesn't have TAG! D:");
 				}else{
 					NBTTagCompound nbt = (NBTTagCompound) orb.getTagCompound().getTag("darkness");
 					
@@ -116,22 +127,22 @@ public class DarkEventHandlerFML {
 					if(power<1){
 						ItemStack pOrb = Darkness.darkLists.getActualOrbFromID(id);
 						if(pOrb==null){
-							System.out.println("player orb cannot be found!");
+							//System.out.println("player orb cannot be found!");
 						}else{
 							pOrb.stackSize--;
 							removalOrbs.add(orb);
-							System.out.println("removed orb");
+							//System.out.println("removed orb");
 						}
 					}
 					
 					nbt.setInteger(Reference.POWER, power);
 					nbt.setInteger(Reference.DISSIPATION_PERCENT, dissipationPercent);
 					
-					System.out.println("Power: "+power+" dissipationPercent: "+dissipationPercent);
-					System.out.println("nbt data says id: "+nbt.getInteger(Reference.ID)+" Power: "+nbt.getInteger(Reference.POWER)+" dissipationP: "+nbt.getInteger(Reference.DISSIPATION_PERCENT));
+					//System.out.println("Power: "+power+" dissipationPercent: "+dissipationPercent);
+					//System.out.println("nbt data says id: "+nbt.getInteger(Reference.ID)+" Power: "+nbt.getInteger(Reference.POWER)+" dissipationP: "+nbt.getInteger(Reference.DISSIPATION_PERCENT));
 					
 					//per player basis... map needs to include orb owner
-					System.out.println("sending orb update message");
+					//System.out.println("sending orb update message");
 					Darkness.simpleNetworkWrapper.sendToAll(new OrbUpdateMessageToClient(id, power, dissipationPercent));
 				}
 			}
@@ -142,7 +153,8 @@ public class DarkEventHandlerFML {
 	}
 	
 	@SubscribeEvent
-	public void detonationDepletion(TickEvent.ServerTickEvent e){
+	public void detonationDepletion(ServerTickEvent e){
+		if(e.side==Side.CLIENT)return;
 		if(Darkness.darkLists.getOrbDetonations().isEmpty()==false){
 			HashSet<Detonation> toRemove = new HashSet<Detonation>();
 
@@ -151,7 +163,7 @@ public class DarkEventHandlerFML {
 				if(d.lifeRemaining<=0){
 					toRemove.add(d);
 					Darkness.simpleNetworkWrapper.sendToAll(new DetonationMessageToClient(false, d.pos.getX(), d.pos.getY(), d.pos.getZ()));
-					System.out.println("sent orb detonate message");
+					//System.out.println("sent orb detonate message");
 				}else{
 					d.lifeRemaining--;
 				}
@@ -182,7 +194,7 @@ public class DarkEventHandlerFML {
 	
 	//player tick event wasn't working so went with player loop through server tick 
 	@SubscribeEvent
-	public void playerEffects(TickEvent.ServerTickEvent e){
+	public void playerEffects(ServerTickEvent e){
 		if(counter%(DARKNESS_CHECK_RATE)==3){//offset from darkness check tick a bit...
 			int icounter = 0;//unused for nao
 			icounter++;
@@ -196,7 +208,8 @@ public class DarkEventHandlerFML {
 				BlockPos ppos = new BlockPos(player.posX, player.posY, player.posZ);
 				
 				//potion effect
-				if(Darkness.darkLists.isPlayerInTowerRadius(player)==false){
+				if(world.provider.dimensionId==0
+					&&Darkness.darkLists.isPlayerInTowerRadius(player)==false){
 					if(Darkness.darkLists.isGhost(player)) {
 						player.removePotionEffect(16);
 						player.removePotionEffect(23);
@@ -219,7 +232,7 @@ public class DarkEventHandlerFML {
 						player.removePotionEffect(2);
 					}
 				}
-				//update held orb list (doesn't really belong here...)
+				//remove from held orb list (doesn't really belong here...)
 				ItemStack stack = player.getHeldItem();
 				if(stack !=null 
 						&& stack.getItem() instanceof LightOrbItem ==false
@@ -236,9 +249,10 @@ public class DarkEventHandlerFML {
 					player.addPotionEffect(new PotionEffect(14, DARKNESS_CHECK_RATE, 0));
 
 					if(Darkness.darkLists.isPlayerInTowerRadius(player)){
-						player.capabilities.allowFlying=true;
+						//player.capabilities.allowFlying=true;
 					}
 				}
+
 
 			}
 		}
@@ -250,18 +264,32 @@ public class DarkEventHandlerFML {
 	@SubscribeEvent
 	public void playerRespawn(PlayerEvent.PlayerRespawnEvent e){
 		if(e.player.worldObj.isRemote==true)return;
-		if(e.player.getEntityData().hasKey("darkness")==false){
-			System.out.println("player doesn't have death location saved");
+		if(e.player.getEntityData().hasKey("darkness")){
+			//System.out.println("player has death location saved as NBT");
+			NBTTagCompound nbt = e.player.getEntityData().getCompoundTag("darkness");
+			int dim = nbt.getInteger(Reference.P_SPAWN_DIMID);
+			if(dim==0) {
+				int x = nbt.getInteger(Reference.P_SPAWN_X);
+				int y = nbt.getInteger(Reference.P_SPAWN_Y);
+				int z = nbt.getInteger(Reference.P_SPAWN_Z);
+				BlockPos spawnPos = new BlockPos(x, y, z);
+				spawnPos = EffectHelper.findGroundY(e.player.worldObj, spawnPos);
+				e.player.setPositionAndUpdate(spawnPos.getX(), spawnPos.getY() + 1, spawnPos.getZ());
+			}
+		}else{
+
+			BlockPos spawnPoint = Darkness.darkLists.getSpawnFor(e.player);
+			if(spawnPoint!=null && e.player.worldObj.provider.dimensionId==0) {
+				spawnPoint = EffectHelper.findGroundY(e.player.worldObj, spawnPoint);
+				e.player.setPositionAndUpdate(spawnPoint.getX(), spawnPoint.getY() + 1, spawnPoint.getZ());
+			}
 		}
-		NBTTagCompound nbt = e.player.getEntityData().getCompoundTag("darkness");
-		int x = nbt.getInteger(Reference.P_SPAWN_X);
-		int y = nbt.getInteger(Reference.P_SPAWN_Y)+1;
-		int z = nbt.getInteger(Reference.P_SPAWN_Z);
-		e.player.setPositionAndUpdate(x,y,z);
+
 		Darkness.darkLists.addGhostPlayer(e.player);
 		e.player.setInvisible(true);
 		DPlayer.nbtSetGhost(e.player, true);
 		Darkness.simpleNetworkWrapper.sendTo(new GhostMessageToClient(true), (EntityPlayerMP) e.player);
+
 		BlockPos pos = new BlockPos(e.player.posX, e.player.posY, e.player.posZ);
 		int range = 10;
 		List mobs = e.player.worldObj.getEntitiesWithinAABB(EntityMob.class, AxisAlignedBB.getBoundingBox(pos.getX()-range, pos.getY()-range, pos.getZ()-range, pos.getX()+range, pos.getY()+range,pos.getZ()+range));
@@ -273,10 +301,12 @@ public class DarkEventHandlerFML {
 				mob.setRevengeTarget(null);
 			}
 		}
+		e.player.inventory.addItemStackToInventory(new ItemStack(Items.ender_pearl));
 	}
 
 	@SubscribeEvent
 	public void playerLogIn(PlayerEvent.PlayerLoggedInEvent e){
+		if(e.player.worldObj.isRemote){return;}
 		if(DPlayer.isGhost(e.player)){
 			Darkness.darkLists.addGhostPlayer(e.player);
 			Darkness.simpleNetworkWrapper.sendTo(new GhostMessageToClient(true), (EntityPlayerMP) e.player);

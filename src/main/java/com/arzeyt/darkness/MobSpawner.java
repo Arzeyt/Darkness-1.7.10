@@ -2,6 +2,7 @@ package com.arzeyt.darkness;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntitySpider;
@@ -37,9 +38,10 @@ public class MobSpawner {
     @SubscribeEvent
     public void darkMobSpawn(TickEvent.ServerTickEvent e){
         counter++;
+        if(e.side== Side.CLIENT)return;
         if(counter% MOB_SPAWN_RATE==0
                 && darkMobSpawn>=0){
-            System.out.println("dark mob spawn: "+darkMobSpawn);
+            //System.out.println("dark mob spawn: "+darkMobSpawn);
             ArrayList list = (ArrayList) MinecraftServer.getServer().getConfigurationManager().playerEntityList;
             Iterator iterator = list.iterator();
             while(iterator.hasNext()) {
@@ -98,6 +100,7 @@ public class MobSpawner {
     }
 
     public void spawnZombie(EntityPlayer player, World world){
+        if(world.isRemote)return;
         //could do a counter check. seems as if server seconds are 40 ticks long... each check after would be an additional second
         BlockPos ppos = new BlockPos(player.posX, player.posY, player.posZ);
         EntityZombie zombie = new EntityZombie(world);
@@ -119,6 +122,7 @@ public class MobSpawner {
     }
 
     public void spawnSkeleton(EntityPlayer player, World world){
+        if(world.isRemote)return;
         //could do a counter check. seems as if server seconds are 40 ticks long... each check after would be an additional second
         BlockPos ppos = new BlockPos(player.posX, player.posY, player.posZ);
         EntitySkeleton skeleton = new EntitySkeleton(world);
@@ -142,6 +146,7 @@ public class MobSpawner {
     }
 
     public void spawnSpider(EntityPlayer player, World world){
+        if(world.isRemote)return;
         //could do a counter check. seems as if server seconds are 40 ticks long... each check after would be an additional second
         BlockPos ppos = new BlockPos(player.posX, player.posY, player.posZ);
         EntitySpider spider = new EntitySpider(world);
@@ -161,10 +166,10 @@ public class MobSpawner {
     }
 
     public void setLifetime(EntityLiving e, int lifetime){
-        System.out.println("set mob lifetime to: "+lifetime+" mobs in list: "+ mobs.size());
+        //System.out.println("set mob lifetime to: "+lifetime+" mobs in list: "+ mobs.size());
         if(e.getEntityData().hasKey("darkness")==false){
             e.getEntityData().setTag("darkness", new NBTTagCompound());
-            System.out.println("entity data: "+e.getEntityData().toString());
+            //System.out.println("entity data: "+e.getEntityData().toString());
         }
         NBTTagCompound nbt = e.getEntityData().getCompoundTag("darkness");
         nbt.setInteger(MOB_LIFETIME, lifetime);

@@ -33,7 +33,7 @@ public class DetonationMessageHandlerOnClient implements IMessageHandler<Detonat
 	protected void processMessage(WorldClient worldClient,
 			DetonationMessageToClient message) {
 
-		System.out.println("processing detonation client side");
+		//System.out.println("processing detonation client side");
 		BlockPos pos = message.getPos();
 		if(message.shouldDetonate()==true){
 			Darkness.clientLists.addDetonation(pos);

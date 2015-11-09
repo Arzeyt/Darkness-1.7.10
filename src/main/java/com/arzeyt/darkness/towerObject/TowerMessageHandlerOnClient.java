@@ -16,7 +16,7 @@ public class TowerMessageHandlerOnClient implements IMessageHandler<TowerMessage
 
 	@Override
 	public IMessage onMessage(final TowerMessageToClient message, MessageContext ctx) {
-		System.out.println("tower update message recieved");
+		//System.out.println("tower update message recieved");
 		if(ctx.side!= Side.CLIENT){
 			System.err.println("TowerMessageToClient sent to wrong side!");
 			return null;
@@ -37,7 +37,7 @@ public class TowerMessageHandlerOnClient implements IMessageHandler<TowerMessage
 
 	protected void processMessage(TowerMessageToClient message) {
 
-		System.out.println("getting entity at: "+message.getPos().getX()+" "+message.getPos().getY()+" "+message.getPos().getZ());
+		//System.out.println("getting entity at: "+message.getPos().getX()+" "+message.getPos().getY()+" "+message.getPos().getZ());
 		int power = message.power();
 		BlockPos pos = message.getPos();
 		World world = Minecraft.getMinecraft().theWorld;
@@ -47,8 +47,8 @@ public class TowerMessageHandlerOnClient implements IMessageHandler<TowerMessage
 			TowerTileEntity te = (TowerTileEntity) world.getTileEntity(pos.getX(), pos.getY(), pos.getZ());
 			te.setPower(power);
 			Darkness.clientLists.addPoweredTower(te);
-			System.out.println("Message processed. Set power to: "+power+" and the tile entity now has: "+te.getPower());
-			System.out.println("Tower is client list: "+ Darkness.clientLists.getPoweredTowers().size());
+			//System.out.println("Message processed. Set power to: "+power+" and the tile entity now has: "+te.getPower());
+			//System.out.println("Tower is client list: "+ Darkness.clientLists.getPoweredTowers().size());
 		}**/
 
 		if(world.getTileEntity(pos.getX(), pos.getY(), pos.getZ())!=null
@@ -64,11 +64,11 @@ public class TowerMessageHandlerOnClient implements IMessageHandler<TowerMessage
 
 			if(fakeTower==null) {//te doesn't exist in client list
 				fakeTower = new FakeTower(pos.getX(), pos.getY(), pos.getZ(), power, world);
-				System.out.println("client fake tower created with power: "+power);
+				//System.out.println("client fake tower created with power: "+power);
 				Darkness.clientLists.addFakeTower(fakeTower);
 			}else{//te exists in client list
 				fakeTower.setPower(power);
-				System.out.println("client fake tower power updated to: "+power);
+				//System.out.println("client fake tower power updated to: "+power);
 			}
 		}
 	}

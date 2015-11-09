@@ -34,7 +34,7 @@ public class FXMessageHandlerOnClient implements IMessageHandler<FXMessageToClie
 	protected void processMessage(WorldClient worldClient,
 			FXMessageToClient message) {
 
-		System.out.println("processing FXMessageToClient client side");
+		//System.out.println("processing FXMessageToClient client side");
 		BlockPos pos = message.getPos();
 		switch(message.getEffectID()){
 			case Reference.FX_VANISH:

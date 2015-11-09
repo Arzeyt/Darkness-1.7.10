@@ -58,10 +58,10 @@ public class LightOrbBlock extends Block {
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int meta, float hitx, float hity, float hitz) {
 		if(player.getHeldItem()==null){
 			int currentSlot = player.inventory.currentItem;
-			player.inventory.setInventorySlotContents(currentSlot, new ItemStack(Darkness.lightOrb));
+			player.inventory.setInventorySlotContents(currentSlot, new ItemStack(Darkness.lightOrbItem));
 			this.breakBlock(world,x,y,z, this, meta);
 		}else{
-			System.out.println("Hand must be empty");
+			//System.out.println("Hand must be empty");
 		}
 		return super.onBlockActivated(world,x,y,z,player,meta,hitx,hity,hitz);
 	}

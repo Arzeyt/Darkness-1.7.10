@@ -15,14 +15,7 @@ public class BlockPos extends Vec3i
 {
     /** The BlockPos with all coordinates 0 */
     public static final BlockPos ORIGIN = new BlockPos(0, 0, 0);
-    private static final int NUM_X_BITS = 1 + MathHelper.calculateLogBaseTwo(MathHelper.roundUpToPowerOfTwo(30000000));
-    private static final int NUM_Z_BITS = NUM_X_BITS;
-    private static final int NUM_Y_BITS = 64 - NUM_X_BITS - NUM_Z_BITS;
-    private static final int Y_SHIFT = 0 + NUM_Z_BITS;
-    private static final int X_SHIFT = Y_SHIFT + NUM_Y_BITS;
-    private static final long X_MASK = (1L << NUM_X_BITS) - 1L;
-    private static final long Y_MASK = (1L << NUM_Y_BITS) - 1L;
-    private static final long Z_MASK = (1L << NUM_Z_BITS) - 1L;
+
     private static final String __OBFID = "CL_00002334";
 
     public BlockPos(int x, int y, int z)
@@ -223,24 +216,6 @@ public class BlockPos extends Vec3i
         return new BlockPos(this.getY() * vec.getZ() - this.getZ() * vec.getY(), this.getZ() * vec.getX() - this.getX() * vec.getZ(), this.getX() * vec.getY() - this.getY() * vec.getX());
     }
 
-    /**
-     * Serialize this BlockPos into a long value
-     */
-    public long toLong()
-    {
-        return ((long)this.getX() & X_MASK) << X_SHIFT | ((long)this.getY() & Y_MASK) << Y_SHIFT | ((long)this.getZ() & Z_MASK) << 0;
-    }
-
-    /**
-     * Create a BlockPos from a serialized long value (created by toLong)
-     */
-    public static BlockPos fromLong(long serialized)
-    {
-        int j = (int)(serialized << 64 - X_SHIFT - NUM_X_BITS >> 64 - NUM_X_BITS);
-        int k = (int)(serialized << 64 - Y_SHIFT - NUM_Y_BITS >> 64 - NUM_Y_BITS);
-        int l = (int)(serialized << 64 - NUM_Z_BITS >> 64 - NUM_Z_BITS);
-        return new BlockPos(j, k, l);
-    }
 
     /**
      * Create an Iterable that returns all positions in the box specified by the given corners

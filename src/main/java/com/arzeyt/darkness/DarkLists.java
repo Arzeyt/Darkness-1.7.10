@@ -28,9 +28,35 @@ public class DarkLists {
 	private HashSet<EntityPlayer> playersInDarkness = new HashSet<EntityPlayer>();
 	private HashSet<TowerTileEntity> poweredTowers = new HashSet<TowerTileEntity>();
 	private HashSet<EntityPlayer> darkPlayer = new HashSet<EntityPlayer>();
-	
+	private HashSet<DPlayer> dplayer = new HashSet<DPlayer>();
+
 	//stores all player-held light orbs
-	
+
+	public void addSpawnPoint(EntityPlayer player, BlockPos spawnPoint){
+		DPlayer p=getDPlayerFrom(player);
+		if(p==null){
+			p=new DPlayer(player, spawnPoint);
+			dplayer.add(p);
+		}else{
+			getDPlayerFrom(player).spawnPoint=spawnPoint;
+		}
+	}
+	public BlockPos getSpawnFor(EntityPlayer player){
+		DPlayer p = getDPlayerFrom(player);
+		if(p!=null){
+			return p.spawnPoint;
+		}
+		return null;
+	}
+
+	public DPlayer getDPlayerFrom(EntityPlayer player){
+		for(DPlayer p : dplayer){
+			if(p.player.getDisplayName()==player.getDisplayName()){
+				return p;
+			}
+		}
+		return null;
+	}
 	private HashSet<ItemStack> lightOrbs = new HashSet<ItemStack>();
 	
 	public HashSet<ItemStack> getLightOrbs(){
@@ -43,12 +69,12 @@ public class DarkLists {
 	 */
 	public void addLightOrb(ItemStack lightOrb){
 		if(orbExists(lightOrb))return;
-		System.out.println("light orbs in list: "+getLightOrbs().size());
+		//System.out.println("light orbs in list: "+getLightOrbs().size());
 		lightOrbs.add(lightOrb);
 	}
 	
 	public void removeLightOrb(ItemStack lightOrb){
-		System.out.println("attempting to remove light orb");
+		//System.out.println("attempting to remove light orb");
 		
 		if(orbExists(lightOrb)){
 			for(ItemStack listOrb : getLightOrbs()){
@@ -57,15 +83,15 @@ public class DarkLists {
 					NBTTagCompound nbtOrb = (NBTTagCompound) listOrb.getTagCompound().getTag("darkness");
 					if(nbtLightOrb.getInteger("id")==nbtOrb.getInteger("id")){
 						lightOrbs.remove(listOrb);
-						System.out.println("removed orb");
+						//System.out.println("removed orb");
 						return;
 					}
 				}else{
-					System.out.println("orb does not have NBT! AHHH");
+					//System.out.println("orb does not have NBT! AHHH");
 				}
 			}
 		}
-		System.out.println("light orb doesn't exist in list!");
+		//System.out.println("light orb doesn't exist in list!");
 	}
 	public boolean orbExists(ItemStack orb1){
 		if(lightOrbs.size()==0)return false;
@@ -77,7 +103,7 @@ public class DarkLists {
 					return true;
 				}
 			}else{
-				System.out.println("orb does not have NBT! AHHH");
+				//System.out.println("orb does not have NBT! AHHH");
 			}
 		}
 		return false;
@@ -196,9 +222,9 @@ public class DarkLists {
 	public void addPoweredTowers(TowerTileEntity t){
 		if(t.getWorldObj().isRemote==false && towerExists(t)==false){
 			poweredTowers.add(t);
-			System.out.println("added powered tower");
+			//System.out.println("added powered tower");
 		}
-		System.out.println("tried to add powered tower");
+		//System.out.println("tried to add powered tower");
 	}
 	
 	public boolean towerExists(TowerTileEntity t){
@@ -214,9 +240,9 @@ public class DarkLists {
 	public void removePoweredTower(TowerTileEntity t){
 		if(getPoweredTowers().contains(t)){
 			poweredTowers.remove(t);
-			System.out.println("removed powered tower");
+			//System.out.println("removed powered tower");
 		}
-		System.out.println("tried to remove powered tower");
+		//System.out.println("tried to remove powered tower");
 	}
 	
 	public boolean isPlayerInDarkness(EntityPlayer p){
@@ -377,6 +403,7 @@ public class DarkLists {
 	}
 	
 	public boolean inDarkness(World w, BlockPos pos){
+		if(w.provider.dimensionId!=0){return false;}
 		//players with orb
 		if(Darkness.darkLists.getPlayersWithOrb().isEmpty()==false
 				&& Darkness.darkLists.getDistanceToNearestPlayerWithOrb(w,pos) <= HELD_ORB_RADIUS){
@@ -404,19 +431,20 @@ public class DarkLists {
 	public void addGhostPlayer(EntityPlayer player){
 		if(isGhost(player)==false){
 			darkPlayer.add(player);
-			System.out.println("added dark player");
+			//System.out.println("added dark player");
 		}
 	}
 
 	public void removeGhostPlayer(EntityPlayer p){
 		if(isGhost(p)){
 			darkPlayer.remove(p);
-			System.out.println("remove dark player");
+			//System.out.println("remove dark player");
 		}
 	}
 
 	public boolean isGhost(EntityPlayer p){
 		return getDarkPlayers().contains(p);
 	}
+
 
 }

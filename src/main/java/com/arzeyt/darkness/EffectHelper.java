@@ -22,7 +22,7 @@ public class EffectHelper {
 	public static void teleportRandomly(EntityLiving e, int range){
 		BlockPos pos = getRandomGroundPos(e.worldObj, new BlockPos(e.posX, e.posY, e.posZ), range);
 		e.setPosition(pos.getX(), pos.getY(), pos.getZ());
-		System.out.println("teleport to: "+pos.toString());
+		//System.out.println("teleport to: "+pos.toString());
 		
 	}
 	
@@ -110,8 +110,10 @@ public class EffectHelper {
 		
 	}
 
+
 	public static void blink(EntityPlayer player) {
-		MovingObjectPosition target = player.rayTrace(300, 1F);
+		int blinkDistance = 15;
+		MovingObjectPosition target = player.rayTrace(blinkDistance, 1F);
 		double i;
 		double j;
 		double k;
@@ -121,14 +123,28 @@ public class EffectHelper {
 				i = target.entityHit.posX;
 				j = target.entityHit.posY;
 				k = target.entityHit.posZ;
+				if (getDistance(player.posX, player.posY, player.posZ, i, j, k)>blinkDistance){
+					return;
+				}
 			} else {
 				i = target.blockX;
 				j = target.blockY;
 				k = target.blockZ;
-
+				if (getDistance(player.posX, player.posY, player.posZ, i, j, k)>blinkDistance){
+					return;
+				}
 			}
-			player.setPositionAndUpdate(i, j, k);
-			System.out.println("teled");
+			player.setPositionAndUpdate(i, j+1, k);
+			//System.out.println("teled");
 		}
+	}
+
+	public static double getDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
+		double dx = x1 - x2;
+		double dy = y1 - y2;
+		double dz = z1 - z2;
+
+		// We should avoid Math.pow or Math.hypot due to perfomance reasons
+		return Math.sqrt(dx * dx + dy * dy + dz * dz);
 	}
 }

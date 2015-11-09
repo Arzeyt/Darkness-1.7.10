@@ -9,9 +9,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 
 import java.util.Random;
@@ -21,7 +23,7 @@ public class TowerBlock extends Block implements ITileEntityProvider{
 	private final String name = "towerBlock";
 	
 	public TowerBlock(){
-		super(Material.rock);
+		super(Material.iron);
 		GameRegistry.registerBlock(this, name);
 		this.setBlockName(Darkness.MODID + "_" + name);
 		//set block texture name**********
@@ -31,9 +33,20 @@ public class TowerBlock extends Block implements ITileEntityProvider{
 		setBlockBounds(0f, 0f, 0f, 1f, 4f, 1f);
 		isBlockContainer=true;
 		setHardness(3F);
+
 		
 	}
-	
+
+	@Override
+	public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_) {
+		return null;
+	}
+
+	@Override
+	public int quantityDropped(Random p_149745_1_) {
+		return 0;
+	}
+
 	@Override
 	public boolean isOpaqueCube() {
 		return false;
@@ -76,15 +89,15 @@ public class TowerBlock extends Block implements ITileEntityProvider{
 							orb.stackSize--;
 							Darkness.darkLists.removeLightOrb(orb);
 							worldIn.playSoundAtEntity(playerIn, "darkness:bell", 1.0F, 1.1F);
-							System.out.println("set tower power to: "+te.getPower());
+							//System.out.println("set tower power to: "+te.getPower());
 						}else{ //this should never happen
-							System.out.println("no data in orb");
+							//System.out.println("no data in orb");
 						}
 					}else{
 						//player is holding something else
 					}
 				}else{//player is holding nothing
-					System.out.println("power = "+te.getPower()+" time is: "+worldIn.getWorldTime());
+					//System.out.println("power = "+te.getPower()+" time is: "+worldIn.getWorldTime());
 					te.takeOrb(playerIn);
 					Random rand = new Random();
 					worldIn.playSoundAtEntity(playerIn, "darkness:bell", 1.0F, 0.5F+rand.nextFloat());				}
@@ -101,12 +114,26 @@ public class TowerBlock extends Block implements ITileEntityProvider{
 		if(Darkness.darkLists.getPoweredTowers().contains(worldIn.getTileEntity(x,y,z))){
 			Darkness.darkLists.removePoweredTower((TowerTileEntity) worldIn.getTileEntity(x,y,z));
 		}
-		if(Darkness.clientLists.getPoweredTowers().contains(worldIn.getTileEntity(x,y,z))){
-			Darkness.clientLists.removePoweredTower((TowerTileEntity) worldIn.getTileEntity(x,y,z));
+		if(worldIn.isRemote) {
+			if (Darkness.clientLists.getPoweredTowers().contains(worldIn.getTileEntity(x, y, z))) {
+				Darkness.clientLists.removePoweredTower((TowerTileEntity) worldIn.getTileEntity(x, y, z));
+			}
+			Darkness.clientLists.removeFakeTowerAt(x,y,z);
 		}
 		super.onBlockDestroyedByPlayer(worldIn, x, y, z, meta);
 	}
 
-	
-	
+	@Override
+	public void onBlockDestroyedByExplosion(World worldIn, int x, int y, int z, Explosion explosion) {
+		if(Darkness.darkLists.getPoweredTowers().contains(worldIn.getTileEntity(x,y,z))){
+			Darkness.darkLists.removePoweredTower((TowerTileEntity) worldIn.getTileEntity(x,y,z));
+		}
+		if(worldIn.isRemote) {
+			if (Darkness.clientLists.getPoweredTowers().contains(worldIn.getTileEntity(x, y, z))) {
+				Darkness.clientLists.removePoweredTower((TowerTileEntity) worldIn.getTileEntity(x, y, z));
+			}
+			Darkness.clientLists.removeFakeTowerAt(x,y,z);
+		}
+		super.onBlockDestroyedByExplosion(worldIn, x, y, z, explosion);
+	}
 }

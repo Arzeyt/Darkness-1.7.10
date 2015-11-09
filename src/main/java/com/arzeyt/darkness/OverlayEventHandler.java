@@ -40,7 +40,7 @@ public class OverlayEventHandler {
 	    
 	    for (int i = FIRST_HOTBAR_SLOT; i < LAST_HOTBAR_SLOT_PLUS_ONE; ++i) {
 	      ItemStack slotItemStack = entityPlayerSP.inventory.getStackInSlot(i);
-	      if (slotItemStack != null && slotItemStack.getItem() == Darkness.lightOrb) {
+	      if (slotItemStack != null && slotItemStack.getItem() == Darkness.lightOrbItem) {
 	        foundInHotbar = true;
 	        break;
 	      }

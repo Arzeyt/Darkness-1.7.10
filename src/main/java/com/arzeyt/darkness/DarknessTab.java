@@ -7,12 +7,12 @@ public class DarknessTab extends CreativeTabs{
 
 	public DarknessTab(String label) {
 		super(label);
-		this.setBackgroundImageName("darkness.png");
+		//this.setBackgroundImageName("darkness.png");
 	}
 
 	@Override
 	public Item getTabIconItem() {
-		return Item.getItemFromBlock(Darkness.towerBlock);
+		return Darkness.lightOrbItem;
 	}
 
 }

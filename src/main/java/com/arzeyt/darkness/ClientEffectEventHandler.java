@@ -3,6 +3,7 @@ package com.arzeyt.darkness;
 import com.arzeyt.darkness.lightOrb.LightOrbItem;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
@@ -19,12 +20,15 @@ public class ClientEffectEventHandler {
 
     @SubscribeEvent
     public void renderDarkFogDensity(FogDensity e){
+        if(Minecraft.getMinecraft().theWorld==null){return;}
+        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        if(player.worldObj.provider.dimensionId!=0){return;}
         if (Minecraft.getMinecraft().thePlayer.capabilities.isCreativeMode){
             e.density=0.01F;
             e.setCanceled(true);
 
-        }else if(Darkness.darkLists.isPlayerInTowerRadius(Minecraft.getMinecraft().thePlayer)==false){
-           e.density =0.005F * (Darkness.darkLists.getDistanceToNearestTower(Minecraft.getMinecraft().thePlayer)-Reference.TOWER_RADIUS);
+        }else if(Darkness.clientLists.isPlayerInTowerRadius(Minecraft.getMinecraft().thePlayer)==false){
+           e.density =0.005F * (Darkness.clientLists.getDistanceToNearestTower(Minecraft.getMinecraft().thePlayer)-Reference.TOWER_RADIUS);
            //e.density = (float) (0.005F * (Darkness.darkLists.getDistanceToNearestTowerDouble(Minecraft.getMinecraft().theWorld.provider.dimensionId, Minecraft.getMinecraft().thePlayer.getPosition())-Reference.TOWER_RADIUS));
 
            if(e.density> 0.25F){
@@ -41,6 +45,8 @@ public class ClientEffectEventHandler {
 
     @SubscribeEvent
     public void renderDarkFogColor(FogColors e){
+        if(Minecraft.getMinecraft().theWorld==null){return;}
+        if(Minecraft.getMinecraft().theWorld.provider.dimensionId!=0){return;}
            e.blue=0.0F;
            e.red=0.0F;
            e.green=0.0F;

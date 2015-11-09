@@ -37,11 +37,11 @@ public class OrbUpdateMessageHandlerOnClient implements IMessageHandler<OrbUpdat
 	protected void processMessage(WorldClient worldClient,
 			OrbUpdateMessageToClient message) {
 
-		System.out.println("processing orb update client side");
+		//System.out.println("processing orb update client side");
 		int id = message.getID();
 		int power = message.getPower();
 		int dp = message.getDissipationPercent();
-		System.out.println("id: "+id+" power: "+power+" dp: "+dp);
+		//System.out.println("id: "+id+" power: "+power+" dp: "+dp);
 		
 		for(ItemStack stack : Minecraft.getMinecraft().thePlayer.inventory.mainInventory){
 			if(stack!=null){
@@ -49,7 +49,7 @@ public class OrbUpdateMessageHandlerOnClient implements IMessageHandler<OrbUpdat
 					if(stack.hasTagCompound()){
 						NBTTagCompound nbt = stack.getTagCompound().getCompoundTag("darkness");
 						if(nbt.getInteger(Reference.ID)==id){
-							System.out.println("updating player's orb");
+							//System.out.println("updating player's orb");
 							nbt.setInteger(Reference.POWER, power);
 							nbt.setInteger(Reference.DISSIPATION_PERCENT, dp);
 						}

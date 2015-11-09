@@ -14,7 +14,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
@@ -62,13 +61,13 @@ public class TowerTileEntity extends TileEntity {
 		if(worldObj.isRemote==false){ //serverside
 			//sync data
 			if(counter%syncRate==0){
-				System.out.println("update tower");
+				//System.out.println("update tower");
 				//updates all clients any time the sync state doesn't equal the old sync state
 				if(syncState!=syncStateOld && worldObj.isRemote==false){
 					updateClient();
 					syncState++;
 					syncStateOld=syncState;
-					System.out.println("syncing to match syncstate");
+					//System.out.println("syncing to match syncstate");
 				}
 			}
 			//if there is a player within sync distance, always sync according to the sync rate
@@ -76,13 +75,13 @@ public class TowerTileEntity extends TileEntity {
 					&& worldObj.getClosestPlayer(xCoord, yCoord, zCoord, SYNC_DISTANCE)!=null
 					&& power>99){
 				
-				System.out.println("player is nearby");
+				//System.out.println("player is nearby");
 				updateClient();
 			}
 			
 			//for initial loading
 			if(loaded==false){
-				System.out.println("loading tower");
+				//System.out.println("loading tower");
 				if(isPowered() && Darkness.darkLists.getPoweredTowers().contains(this)==false){
 					Darkness.darkLists.addPoweredTowers(this);
 					loaded=true;
@@ -100,7 +99,7 @@ public class TowerTileEntity extends TileEntity {
 					&& timeOfDay < Reference.TOWER_DEPLETE_END_TIME
 					&& timeOfDay> Reference.TOWER_DEPLETE_START_TIME
 					&& power>=1){
-				System.out.println("decrementing power");
+				//System.out.println("decrementing power");
 					setPower(getPower()-1);
 			}
 			if(counter% Reference.TOWER_CHARGE_RATE ==0
@@ -108,9 +107,9 @@ public class TowerTileEntity extends TileEntity {
 					&& timeOfDay< Reference.TOWER_CHARGE_END_TIME
 					&& Reference.TOWER_CHARGE_START_TIME <timeOfDay
 					&& power<100){
-				System.out.println("incrementing power");
+				//System.out.println("incrementing power");
 				setPower(getPower()+1);
-				System.out.println("power = "+getPower());
+				//System.out.println("power = "+getPower());
 			}
 
 			//sky clear check
@@ -151,12 +150,12 @@ public class TowerTileEntity extends TileEntity {
 					&&power>0){
 				doBorderEffect=true;
 				borderEffectRender();
-				System.out.println("border effect on");
+				//System.out.println("border effect on");
 			}else if(doBorderEffect==true
 					&&power<=0){
 				doBorderEffect=false;
 				borderEffectOff();
-				System.out.println("border effect off");
+				//System.out.println("border effect off");
 			}else if(doBorderEffect==true
 					&&counter%borderConstructRate==0){
 				borderEffectRender();
@@ -199,20 +198,20 @@ public class TowerTileEntity extends TileEntity {
 		default:
 			break;
 		}
-		System.out.println("magic block: " + magicBlockPos.toString());
+		//System.out.println("magic block: " + magicBlockPos.toString());
 		magicBlockPos = EffectHelper.findGroundY(worldObj, new BlockPos(x,y+1,z));
 		try{
 			worldObj.setBlock(magicBlockPos.getX(), magicBlockPos.getY(), magicBlockPos.getZ(), Blocks.bedrock);
 		}catch(Exception e){
-			System.out.println("exception, brah");
+			//System.out.println("exception, brah");
 		}
 		token++;
-		System.out.println("token: "+token);
+		//System.out.println("token: "+token);
 	}
 
 	private void updateClient() {
 		if(worldObj.isRemote==false){
-			System.out.println("update tower at: "+this.xCoord+" "+this.yCoord+" "+this.zCoord+" dim: "+this.worldObj.provider.dimensionId);
+			//System.out.println("update tower at: "+this.xCoord+" "+this.yCoord+" "+this.zCoord+" dim: "+this.worldObj.provider.dimensionId);
 			Darkness.simpleNetworkWrapper.sendToDimension(new TowerMessageToClient(getPower(),xCoord, yCoord, zCoord), this.worldObj.provider.dimensionId);
 		}
 	}
@@ -224,7 +223,7 @@ public class TowerTileEntity extends TileEntity {
 		NBTTagCompound nbt = (NBTTagCompound) compound.getTag("darkness");
 		this.powered = nbt.getBoolean("powered");
 		this.power=(nbt.getInteger("orbPower"));
-		System.out.println("nbt tag = "+compound.toString());
+		//System.out.println("nbt tag = "+compound.toString());
 	}
 	
 	
@@ -233,7 +232,7 @@ public class TowerTileEntity extends TileEntity {
 		super.writeToNBT(compound);
 		generateCompound(compound);
 
-		System.out.println("nbt tag = "+compound.toString());
+		//System.out.println("nbt tag = "+compound.toString());
 	}
 	
 	public NBTTagCompound generateCompound(NBTTagCompound compound){
@@ -242,7 +241,7 @@ public class TowerTileEntity extends TileEntity {
 		nbt.setInteger("orbPower", getPower());
 		
 		compound.setTag("darkness", nbt);
-		System.out.println("compound tag generated is: "+compound.toString());
+		//System.out.println("compound tag generated is: "+compound.toString());
 		return compound;
 	}
 	
@@ -272,7 +271,7 @@ public class TowerTileEntity extends TileEntity {
 				Darkness.darkLists.removePoweredTower(this);
 			}
 		}
-		System.out.println("set power to: "+power+"  powered= "+this.powered);
+		//System.out.println("set power to: "+power+"  powered= "+this.powered);
 		syncState++;
 	}
 	
@@ -300,21 +299,21 @@ public class TowerTileEntity extends TileEntity {
 				ItemStack newOrb = generateLightOrb(p);
 				p.inventory.addItemStackToInventory(newOrb);
 				setPower(0);
-				System.out.println("took orb");
+				//System.out.println("took orb");
 				return true;
 			}else{
-				System.out.println("wait for cooldown in: "+takeOrbAtNoonCooldownCounter+" ticks");
+				//System.out.println("wait for cooldown in: "+takeOrbAtNoonCooldownCounter+" ticks");
 				return false;
 			}
 		}**/
 		if(getPower()<=1){
-			System.out.println("power too low to take orb");
+			//System.out.println("power too low to take orb");
 			return false;
 		}else{
 			ItemStack newOrb = generateLightOrb(p);
 			p.inventory.addItemStackToInventory(newOrb);
 			setPower(1);
-			System.out.println("took orb");
+			//System.out.println("took orb");
 			return true;
 		}
 	}
@@ -325,7 +324,7 @@ public class TowerTileEntity extends TileEntity {
 	 */
 	public ItemStack generateLightOrb(EntityPlayer p){
 		Random rand = new Random();
-		ItemStack lightOrb = new ItemStack(Darkness.lightOrb);
+		ItemStack lightOrb = new ItemStack(Darkness.lightOrbItem);
 		NBTTagCompound compound = new NBTTagCompound();
 		NBTTagCompound nbt = new NBTTagCompound();
 			nbt.setInteger(Reference.POWER, this.getPower());
