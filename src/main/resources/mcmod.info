@@ -1,8 +1,8 @@
 [
 {
-  "modid": "thedarkness",
-  "name": "The Darkness Mod",
-  "description": "Don't die",
+  "modid": "darkness",
+  "name": "Darkness Mod",
+  "description": "Example placeholder mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
